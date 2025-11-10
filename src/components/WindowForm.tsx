@@ -24,6 +24,11 @@ export interface WindowSpecs {
   lockingType: string;
   quantity: number;
   rate: number;
+  project?: string;
+  finish?: string;
+  location?: string;
+  code?: string;
+  hardwareBrand?: string;
 }
 
 interface WindowFormProps {

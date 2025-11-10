@@ -2,134 +2,148 @@ import jsPDF from "jspdf";
 import { WindowSpecs } from "@/components/WindowForm";
 
 export const generateQuotationPDF = (specs: WindowSpecs, clientName = "Valued Customer") => {
-  const doc = new jsPDF();
-  
-  // Calculate values
+  const doc = new jsPDF("p", "mm", "a4");
+
+  // 🧮 Calculations
   const sqft = (specs.height * specs.width) / 144;
   const total = sqft * specs.rate * specs.quantity;
-  
-  // Header - Company Name
-  doc.setFillColor(30, 64, 175); // Primary blue
-  doc.rect(0, 0, 210, 40, "F");
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  doc.text("TEKNA WINDOW SYSTEM", 105, 20, { align: "center" });
-  
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text("Professional Window Solutions", 105, 30, { align: "center" });
-  
-  // Reset text color
-  doc.setTextColor(0, 0, 0);
-  
-  // Quotation Title
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text("QUOTATION", 105, 55, { align: "center" });
-  
-  // Quotation Details
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  const currentDate = new Date().toLocaleDateString("en-IN");
-  const quotationNo = `TW${Date.now().toString().slice(-6)}`;
-  
-  doc.text(`Date: ${currentDate}`, 20, 70);
-  doc.text(`Quotation No: ${quotationNo}`, 20, 77);
-  doc.text(`Client: ${clientName}`, 20, 84);
-  
-  // Table Header
-  const startY = 100;
-  doc.setFillColor(220, 220, 220);
-  doc.rect(20, startY, 170, 10, "F");
-  
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("Specification", 25, startY + 7);
-  doc.text("Value", 120, startY + 7);
-  
-  // Table Content
-  doc.setFont("helvetica", "normal");
-  let y = startY + 17;
-  const lineHeight = 7;
-  
-  const specifications = [
-    ["Height", `${specs.height} inches`],
-    ["Width", `${specs.width} inches`],
-    ["Profile System", specs.profileSystem],
-    ["Window Type", specs.windowType],
-    ["Design", specs.design],
-    ["Glass Type", specs.glassType],
-    ["Mesh", specs.mesh ? "Yes" : "No"],
-    ["Grill", specs.grill ? "Yes" : "No"],
-    ["Locking Type", specs.lockingType],
-    ["Quantity", specs.quantity.toString()],
-  ];
-  
-  specifications.forEach(([label, value]) => {
-    doc.text(label, 25, y);
-    doc.text(value, 120, y);
-    y += lineHeight;
-  });
-  
-  // Calculation Section
-  y += 10;
-  doc.setDrawColor(200, 200, 200);
-  doc.line(20, y, 190, y);
-  y += 10;
-  
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("CALCULATION", 25, y);
-  
-  y += 10;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(`Square Feet: ${sqft.toFixed(2)} sq.ft`, 25, y);
-  y += 7;
-  doc.text(`Rate per sq.ft: ₹${specs.rate.toFixed(2)}`, 25, y);
-  y += 7;
-  doc.text(`Quantity: ${specs.quantity}`, 25, y);
-  
-  y += 15;
-  doc.setFillColor(30, 64, 175);
-  doc.rect(20, y - 7, 170, 12, "F");
-  doc.setTextColor(255, 255, 255);
+
+  // 🧱 Outer Border
+  doc.setDrawColor(0);
+  doc.rect(10, 10, 190, 277);
+
+  // 🧢 Header (Company Info)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text(`TOTAL: ₹${total.toFixed(2)}`, 105, y, { align: "center" });
-  
-  // Terms & Conditions
-  doc.setTextColor(0, 0, 0);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  y += 25;
-  doc.text("TERMS & CONDITIONS", 20, y);
-  
+  doc.text("TEKNA WINDOW SYSTEM", 15, 20);
+
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text("VAVDI INDUSTRY AREA", 15, 26);
+  doc.text("VAVDI MAIN ROAD", 15, 31);
+  doc.text("TEKNA WINDOW", 15, 36);
+  doc.text("Mobile : 9825256525", 15, 42);
+  doc.text("Email : TEKNAWIN01@GMAIL.COM", 15, 47);
+  doc.text("GSTIN : 24AMIPS5762R1Z4", 15, 52);
+
+  // Logo Box (placeholder)
+  doc.setDrawColor(0);
+  doc.setFillColor(230, 240, 230);
+  doc.rect(150, 18, 45, 25, "FD");
+  doc.setTextColor(0);
+  doc.setFontSize(10);
+  doc.text("TEKNA WINDOW SYSTEM", 172, 33, { align: "center" });
+
+  // Orange Line Separator
+  doc.setDrawColor(220, 120, 0);
+  doc.setLineWidth(0.7);
+  doc.line(10, 58, 200, 58);
+
+  // 🧾 Client + Quotation Details
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Client Name :", 15, 66);
+  doc.text("Project :", 15, 72);
+
+  doc.text("Quotation No. :", 115, 66);
+  doc.text("Finish :", 115, 72);
+  doc.text("Date :", 115, 78);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(clientName.toUpperCase(), 45, 66);
+  doc.text(specs.project?.toUpperCase() || "OFFICE", 45, 72);
+  doc.text(specs.finish?.toUpperCase() || "POWDER COATING", 145, 72);
+
+  const currentDate = new Date().toLocaleDateString("en-IN");
+  const quotationNo = `QE/TK/${Date.now().toString().slice(-3)}`;
+  doc.text(quotationNo, 145, 66);
+  doc.text(currentDate, 145, 78);
+
+  // Orange Line Separator
+  doc.setDrawColor(220, 120, 0);
+  doc.line(10, 82, 200, 82);
+
+  // 📍 Location + Code
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text(`Location : ${specs.location || "W1"}`, 15, 90);
+  doc.text(`Code : ${specs.code || "W1"}`, 170, 90);
+
+  // Grey Box (Content Border)
+  doc.setDrawColor(0);
+  doc.rect(10, 94, 190, 150);
+
+  // Left Section – Image Box
+  doc.setDrawColor(0);
+  doc.rect(15, 105, 80, 120);
   doc.setFontSize(9);
-  y += 7;
-  const terms = [
-    "1. Quotation valid for 30 days from date of issue",
-    "2. Installation charges may apply separately",
-    "3. 50% advance payment required to commence work",
-    "4. Delivery timeline: 15-20 working days from confirmation",
-    "5. Warranty: 10 years on profile, 1 year on hardware & accessories",
-    "6. Measurement verification required before final order",
-  ];
-  
-  terms.forEach((term) => {
-    doc.text(term, 25, y);
+  doc.text(`W x ${specs.width?.toFixed(2) || "48.00"}`, 35, 100);
+  doc.text(`H x ${specs.height?.toFixed(2) || "51.00"}`, 20, 170, { angle: 90 });
+
+  // Right Section – Details
+  doc.setFontSize(9);
+  let y = 105;
+  const addRow = (label: string, value: string) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(label, 105, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(`: ${value}`, 140, y);
     y += 6;
-  });
-  
-  // Footer
+  };
+
+  addRow("Size (Inch)", `W x ${specs.width}   H x ${specs.height}`);
+  addRow("Profile System", specs.profileSystem || "50MM CASEMENT");
+  addRow("Design", specs.design || "FIX GLASS");
+  addRow("Glass", specs.glassType || "5MM CL +10mm air gap +5mm CL tuff");
+  addRow("Mess", specs.mesh ? "YES" : "-");
+  addRow("Locking", specs.lockingType || "-");
+  addRow("Grill", specs.grill ? "YES" : "REMOVE");
+
+  // Computed Values Section
+  doc.setDrawColor(0);
+  doc.rect(105, y + 2, 90, 30);
+  doc.setFont("helvetica", "bold");
+  doc.text("Computed Values", 110, y + 8);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Sq.ft per Window : ${sqft.toFixed(2)} Sq.ft`, 110, y + 14);
+  doc.text(`Rate per Sq.ft : ₹${specs.rate.toFixed(2)}`, 110, y + 20);
+  doc.text(`Quantity : ${specs.quantity} pcs`, 110, y + 26);
+  doc.text(`Value : ₹${total.toFixed(2)}`, 110, y + 32);
+  y += 38;
+
+  // Hardware Section
+  doc.rect(105, y, 90, 15);
+  doc.setFont("helvetica", "bold");
+  doc.text("Hardware Brand", 110, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.text(specs.hardwareBrand || "PREMIUM QUALITY", 110, y + 12);
+
+  // 🧾 Footer Terms
+  let ty = 250;
+  doc.setFont("helvetica", "bold");
+  doc.text("TERMS & CONDITIONS", 15, ty);
+  ty += 6;
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text("Thank you for choosing TEKNA Window System", 105, 280, { align: "center" });
-  doc.text("For queries, contact: info@teknawindows.com | +91 XXXXX XXXXX", 105, 285, { align: "center" });
-  
-  // Save PDF
-  doc.save(`TEKNA_Quotation_${quotationNo}.pdf`);
+  const terms = [
+    "1. Quotation valid for 1 week.",
+    "2. Transportation and GST extra.",
+    "3. Installation time: 40–45 days.",
+    "4. 70% advance, 20% before dispatch, 10% after installation.",
+    "5. Glass breakage not covered after installation.",
+  ];
+  terms.forEach((t) => {
+    doc.text(t, 15, ty);
+    ty += 5;
+  });
+
+  // Signature Boxes
+  doc.rect(15, 270, 80, 15);
+  doc.rect(115, 270, 80, 15);
+  doc.setFontSize(9);
+  doc.text("Authorised Signatory", 25, 280);
+  doc.text("Signature of Customer", 125, 280);
+
+  // 💾 Save File
+  doc.save(`Quotation_${clientName.replace(/\s+/g, "_")}_${quotationNo}.pdf`);
 };
