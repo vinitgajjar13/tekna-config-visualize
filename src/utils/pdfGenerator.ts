@@ -73,12 +73,114 @@ export const generateQuotationPDF = (specs: WindowSpecs, clientName = "Valued Cu
   doc.setDrawColor(0);
   doc.rect(10, 94, 190, 150);
 
-  // Left Section – Image Box
+  // Left Section – Window Diagram with Measurements
+  const diagramX = 15;
+  const diagramY = 105;
+  const diagramW = 80;
+  const diagramH = 120;
+  
+  // Outer border for diagram area
   doc.setDrawColor(0);
-  doc.rect(15, 105, 80, 120);
+  doc.setLineWidth(0.3);
+  doc.rect(diagramX, diagramY, diagramW, diagramH);
+  
+  // Draw dimension lines and labels
   doc.setFontSize(9);
-  doc.text(`W x ${specs.width?.toFixed(2) || "48.00"}`, 35, 100);
-  doc.text(`H x ${specs.height?.toFixed(2) || "51.00"}`, 20, 170, { angle: 90 });
+  doc.setFont("helvetica", "bold");
+  
+  // Width dimension (top)
+  doc.setDrawColor(100, 100, 100);
+  doc.line(diagramX + 5, diagramY - 5, diagramX + diagramW - 5, diagramY - 5);
+  doc.line(diagramX + 5, diagramY - 7, diagramX + 5, diagramY - 3);
+  doc.line(diagramX + diagramW - 5, diagramY - 7, diagramX + diagramW - 5, diagramY - 3);
+  doc.text(`W: ${specs.width}"`, diagramX + diagramW / 2, diagramY - 8, { align: "center" });
+  
+  // Height dimension (left)
+  doc.line(diagramX - 5, diagramY + 5, diagramX - 5, diagramY + diagramH - 5);
+  doc.line(diagramX - 7, diagramY + 5, diagramX - 3, diagramY + 5);
+  doc.line(diagramX - 7, diagramY + diagramH - 5, diagramX - 3, diagramY + diagramH - 5);
+  doc.text(`H: ${specs.height}"`, diagramX - 10, diagramY + diagramH / 2, { angle: 90 });
+  
+  // Draw window diagram based on type
+  const innerX = diagramX + 10;
+  const innerY = diagramY + 10;
+  const innerW = diagramW - 20;
+  const innerH = diagramH - 20;
+  
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  
+  const isSlider = specs.windowType === "Slider" || 
+                   specs.design?.includes("SLIDING") || 
+                   specs.profileSystem?.includes("SLIDER");
+  
+  if (isSlider) {
+    // Sliding Window
+    // Outer frame
+    doc.rect(innerX, innerY, innerW, innerH);
+    
+    // Middle divider
+    doc.line(innerX + innerW / 2, innerY, innerX + innerW / 2, innerY + innerH);
+    
+    // Left panel
+    doc.rect(innerX + 2, innerY + 2, innerW / 2 - 4, innerH - 4);
+    
+    // Right panel
+    doc.rect(innerX + innerW / 2 + 2, innerY + 2, innerW / 2 - 4, innerH - 4);
+    
+    // Glass indication (diagonal lines)
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(150, 150, 150);
+    doc.line(innerX + 10, innerY + 15, innerX + 18, innerY + 23);
+    doc.line(innerX + 13, innerY + 15, innerX + 21, innerY + 23);
+    
+    doc.line(innerX + innerW / 2 + 10, innerY + 15, innerX + innerW / 2 + 18, innerY + 23);
+    doc.line(innerX + innerW / 2 + 13, innerY + 15, innerX + innerW / 2 + 21, innerY + 23);
+    
+    // Handles
+    doc.setFillColor(0, 0, 0);
+    doc.rect(innerX + innerW / 4, innerY + innerH / 2 - 3, 3, 6, "F");
+    doc.rect(innerX + 3 * innerW / 4 - 3, innerY + innerH / 2 - 3, 3, 6, "F");
+    
+    // Direction arrows
+    doc.setDrawColor(0);
+    doc.line(innerX + innerW / 4 - 5, innerY + innerH / 2, innerX + innerW / 4 - 10, innerY + innerH / 2);
+    doc.line(innerX + innerW / 4 - 10, innerY + innerH / 2, innerX + innerW / 4 - 8, innerY + innerH / 2 - 2);
+    doc.line(innerX + innerW / 4 - 10, innerY + innerH / 2, innerX + innerW / 4 - 8, innerY + innerH / 2 + 2);
+    
+    doc.line(innerX + 3 * innerW / 4 + 5, innerY + innerH / 2, innerX + 3 * innerW / 4 + 10, innerY + innerH / 2);
+    doc.line(innerX + 3 * innerW / 4 + 10, innerY + innerH / 2, innerX + 3 * innerW / 4 + 8, innerY + innerH / 2 - 2);
+    doc.line(innerX + 3 * innerW / 4 + 10, innerY + innerH / 2, innerX + 3 * innerW / 4 + 8, innerY + innerH / 2 + 2);
+  } else {
+    // Fixed/Casement Window
+    // Multiple frame layers
+    doc.rect(innerX, innerY, innerW, innerH);
+    doc.rect(innerX + 3, innerY + 3, innerW - 6, innerH - 6);
+    doc.rect(innerX + 6, innerY + 6, innerW - 12, innerH - 12);
+    
+    // Glass indication (diagonal lines in center)
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(150, 150, 150);
+    const centerX = innerX + innerW / 2;
+    const centerY = innerY + innerH / 2;
+    doc.line(centerX - 8, centerY - 8, centerX, centerY);
+    doc.line(centerX - 5, centerY - 8, centerX + 3, centerY);
+    doc.line(centerX - 2, centerY - 8, centerX + 6, centerY);
+  }
+  
+  // Add grill if specified
+  if (specs.grill) {
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.2);
+    const gridSpacing = innerW / 4;
+    for (let i = 1; i < 4; i++) {
+      doc.line(innerX + i * gridSpacing, innerY + 6, innerX + i * gridSpacing, innerY + innerH - 6);
+    }
+    const gridSpacingH = innerH / 4;
+    for (let i = 1; i < 4; i++) {
+      doc.line(innerX + 6, innerY + i * gridSpacingH, innerX + innerW - 6, innerY + i * gridSpacingH);
+    }
+  }
 
   // Right Section – Details
   doc.setFontSize(9);
